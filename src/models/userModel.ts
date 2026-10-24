@@ -21,7 +21,7 @@ const userSchema = new Schema<IUser>({
   email:{
     type: String,
     required: true,
-    unique: true,
+    unique: [true, "this email exist already"],
     trim:true,
     match: [/.+@.+\..+/, "please enter correct email"],
   },
@@ -33,7 +33,7 @@ const userSchema = new Schema<IUser>({
       "password must be at least 8 characters and contain both letters and numbers",
     ],
   },
-})
+},{timestamps: true})
 
 
 userSchema.pre('save', async function (this: IUser) {
