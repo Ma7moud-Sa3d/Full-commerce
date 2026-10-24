@@ -16,7 +16,9 @@ app.get("/", (req, res)=> {
   res.json("Fuck from server side !")
 })
 
+//! Database function
 connectToDB()
+
 app.listen(port, ()=> {
   console.log(`app run successfully on http://localhost:${port}`)
 })
