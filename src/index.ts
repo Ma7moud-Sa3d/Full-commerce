@@ -6,21 +6,28 @@ import dotenv from "dotenv"
 dotenv.config()
 import connectToDB from "./config/DB.js"
 import userRoutes from "./routes/userRoutes.js";
+import { setInitialProducts } from "./controllers/productControllers.js";
+import productRoutes from "./routes/productRoutes.js";
 
 const app = express()
 app.use(express.json())
 const port = 3001
 
-//! Roters
-app.use("/user", userRoutes)
+//! Database function
+connectToDB()
 
 //! endpoint test
 app.get("/", (req, res)=> {
   res.json("Fuck from server side !")
 })
 
-//! Database function
-connectToDB()
+//! Roters
+app.use("/user", userRoutes)
+app.use("/products", productRoutes)
+
+//! initial set products
+setInitialProducts()
+
 
 app.listen(port, ()=> {
   console.log(`app run successfully on http://localhost:${port}`)
