@@ -5,6 +5,7 @@ export interface IUser extends Document{
   lastName: string;
   email: string;
   password: string;
+  role: string
 }
 
 const userSchema = new Schema<IUser>({
@@ -33,6 +34,12 @@ const userSchema = new Schema<IUser>({
       "password must be at least 8 characters and contain both letters and numbers",
     ],
   },
+  role: {
+    type: String,
+    required: true,
+    enum: ["user", "admin"],
+    default: "user"
+  }
 },{timestamps: true})
 
 

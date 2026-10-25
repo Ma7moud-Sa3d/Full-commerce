@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import userModel from "../models/userModel.js";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 // const User= {firstName, lastName, email, password}
 
@@ -31,19 +32,27 @@ const Register = async (req: Request, res: Response) => {
 4- if all good
 5- create the token 
 6- then return token
-7- 
-8- 
-9- 
 */
 const Login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
+    const user = await userModel.findOne({email});
+    if (!user)
+      return res.status(400).json({ message: "Email or password is wrong" });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch)
+      return res.status(400).json({ message: "Email or password is wrong" });
+    const secretKey = process.env.SECRET_KEY;
+    if (!secretKey)
+      return res.status(400).json({ message: "eror hen create the token !" });
+    const token = jwt.sign({ id: user._id, role: user.role }, secretKey);
+    res.status(200).json({data: token, message: "Done ✅"})
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
 };
 
-module.exports = {
+export {
   Register,
   Login,
 };

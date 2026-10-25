@@ -5,11 +5,14 @@ import express from "express";
 import dotenv from "dotenv"
 dotenv.config()
 import connectToDB from "./config/DB.js"
+import userRoutes from "./routes/userRoutes.js";
 
 const app = express()
 app.use(express.json())
 const port = 3001
 
+//! Roters
+app.use("/user", userRoutes)
 
 //! endpoint test
 app.get("/", (req, res)=> {
