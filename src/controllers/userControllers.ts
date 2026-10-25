@@ -10,7 +10,7 @@ import bcrypt from "bcrypt";
 2- check argument if no > appear message error
 3- create user
 4- save the new user in Database
-5- response with data of user
+5- response with data of user.select("-password")
 */
 const Register = async (req: Request, res: Response) => {
   try {
@@ -19,7 +19,12 @@ const Register = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Must enter all fields" });
     const user = new userModel({ firstName, lastName, email, password });
     await user.save();
-    res.status(201).json({ data: user, message: "created user successfully" });
+    res
+      .status(201)
+      .json({
+        data: { firstName: user.firstName, lastName: user.lastName },
+        message: "created user successfully",
+      });
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
@@ -36,7 +41,17 @@ const Register = async (req: Request, res: Response) => {
 const Login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
-    const user = await userModel.findOne({email});
+    if (
+      typeof email !== "string" ||
+      typeof password !== "string" ||
+      !email.trim() ||
+      !password
+    ) {
+      return res.status(400).json({
+        message: "Email and password are required",
+      });
+    }
+    const user = await userModel.findOne({ email });
     if (!user)
       return res.status(400).json({ message: "Email or password is wrong" });
     const isMatch = await bcrypt.compare(password, user.password);
@@ -46,13 +61,10 @@ const Login = async (req: Request, res: Response) => {
     if (!secretKey)
       return res.status(400).json({ message: "eror hen create the token !" });
     const token = jwt.sign({ id: user._id, role: user.role }, secretKey);
-    res.status(200).json({data: token, message: "Done ✅"})
+    res.status(200).json({ data: token, message: "Done ✅" });
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
 };
 
-export {
-  Register,
-  Login,
-};
+export { Register, Login };
