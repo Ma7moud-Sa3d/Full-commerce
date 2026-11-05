@@ -1,26 +1,50 @@
+
 import jwt from "jsonwebtoken";
-import type {Request, Response, NextFunction} from "express"
+import type { Request, Response, NextFunction } from "express";
 
-interface AuthRequest extends Request {
-  user?: string | jwt.JwtPayload
-}
-
-
-export const auth = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const auth = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const auth = req.headers.authorization;
-    if (!auth) return res.status(401).json({ message: "No authorization" });
-    const token = auth.split(" ")[1];
-    if (!token) throw new Error("token is not configured");
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader?.startsWith("Bearer ")) {
+      return res.status(401).json({
+        message: "No authorization token provided",
+      });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+if (!token) {
+  return res.status(401).json({
+    message: "Token is missing",
+  });
+}
     const secret = process.env.SECRET_KEY;
-    if (!secret) throw new Error("SECRET_KEY is not configured");
-    const decriptToken = jwt.verify(token, secret);
-    req.user = decriptToken;
+
+    if (!secret) {
+      throw new Error("SECRET_KEY is not configured");
+    }
+
+    const decoded = jwt.verify(token, secret);
+
+    if (typeof decoded === "string" || typeof decoded.id !== "string") {
+      return res.status(401).json({
+        message: "Invalid token",
+      });
+    }
+
+    req.user = decoded as Express.AuthUser;
+
     next();
   } catch (error) {
-    next(error)
+    next(error);
   }
 };
+
 
 //! Good function for authorazation
 {

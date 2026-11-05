@@ -8,6 +8,7 @@ import connectToDB from "./config/DB.js"
 import userRoutes from "./routes/userRoutes.js";
 import { setInitialProducts } from "./controllers/productControllers.js";
 import productRoutes from "./routes/productRoutes.js";
+import cartRoutes from "./routes/cartRoutes.js";
 
 const app = express()
 app.use(express.json())
@@ -24,6 +25,7 @@ app.get("/", (req, res)=> {
 //! Routes
 app.use("/user", userRoutes)
 app.use("/products", productRoutes)
+app.use("/cart", cartRoutes)
 
 //! initial set products
 setInitialProducts()

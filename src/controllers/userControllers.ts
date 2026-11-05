@@ -60,7 +60,7 @@ const Login = async (req: Request, res: Response) => {
     const secretKey = process.env.SECRET_KEY;
     if (!secretKey)
       return res.status(400).json({ message: "eror hen create the token !" });
-    const token = jwt.sign({ id: user._id, role: user.role }, secretKey);
+    const token = jwt.sign({ id: user._id.toString(), role: user.role }, secretKey);
     res.status(200).json({ data: token, message: "Done ✅" });
   } catch (error: any) {
     res.status(400).json({ message: error.message });

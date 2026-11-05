@@ -21,23 +21,31 @@ const cartItemSchema = new Schema({
   },
 });
 
-const cartSchema = new Schema({
-  userId: {
-    type: Schema.Types.ObjectId,
-    required: true,
-    ref: "User",
+const cartSchema = new Schema(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
+    items: {
+      type: [cartItemSchema],
+      default: [],
+    },
+    totalAmount: {
+      type: Number,
+      required: true,
+      min: 0,
+      default: 0,
+    },
+    status: {
+      type: String,
+      enum: ["active", "complete"],
+      default: "active",
+    },
   },
-  items: [cartItemSchema],
-  totalAmount: {
-    type: Number,
-    required: true,
-  },
-  status: {
-    type: String,
-    enum: ["active", "complete"],
-    default: "active",
-  },
-}, {timestamps: true});
+  { timestamps: true },
+);
 
 export type ICartItem = InferSchemaType<typeof cartItemSchema>;
 
