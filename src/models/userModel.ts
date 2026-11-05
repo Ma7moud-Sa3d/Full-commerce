@@ -48,7 +48,15 @@ userSchema.pre('save', async function (this: IUser) {
 
   this.password = await bcrypt.hash(this.password, 10);
 });
+//! Infer the schema type
+// export type IUser = InferSchemaType<typeof userSchema>;
 
+//! Hash password before saving
+// userSchema.pre("save", async function (this: HydratedDocument<IUser>) {
+//   if (!this.isModified("password")) return;
+
+//   this.password = await bcrypt.hash(this.password, 10);
+// });
 
 const userModel = mongoose.model('User',userSchema)
 

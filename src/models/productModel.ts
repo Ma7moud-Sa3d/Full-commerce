@@ -35,6 +35,6 @@ const productSchema = new Schema(
 // يا TypeScript، استنتجلي نوع البيانات الموجودة في productSchema وسمّيه IProduct.
 export type IProduct = InferSchemaType<typeof productSchema>;
 
-const Product = model("Product", productSchema);
+const Product = model<IProduct>("Product", productSchema);
 
 export default Product;

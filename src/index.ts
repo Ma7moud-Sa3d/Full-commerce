@@ -21,7 +21,7 @@ app.get("/", (req, res)=> {
   res.json("Fuck from server side !")
 })
 
-//! Roters
+//! Routes
 app.use("/user", userRoutes)
 app.use("/products", productRoutes)
 
