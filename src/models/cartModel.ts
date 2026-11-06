@@ -9,6 +9,7 @@ const cartItemSchema = new Schema({
   unitPrice: {
     type: Number,
     required: true,
+    min:0
   },
   amount: {
     type: Number,
