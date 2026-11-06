@@ -1,4 +1,3 @@
-
 import cartModel from "../models/cartModel.js";
 import type { Request, Response } from "express";
 
@@ -9,22 +8,17 @@ const createCartForUser = async (userId: string) => {
   });
 
   if (!cart) {
-    cart = await cartModel.create({
-      userId,
-      items: [],
-      totalAmount: 0,
-    });
+    cart = await cartModel.create({userId});
+    await cart.save()
   }
 
   return cart;
 };
 
-const getActiveCartForUser = async (
-  req: Request,
-  res: Response
-) => {
+const getActiveCartForUser = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.id;
+    if(!req.user) return res.status(400).json("Invalid token!!")
+    const userId = req.user.id;
 
     if (!userId) {
       return res.status(401).json({
@@ -40,24 +34,10 @@ const getActiveCartForUser = async (
     });
   } catch (error) {
     return res.status(500).json({
-      message: error instanceof Error
-        ? error.message
-        : "Internal server error",
+      message: error instanceof Error ? error.message : "Internal server error",
     });
   }
 };
 
 export { getActiveCartForUser };
 
-//! ===== > logic
-//1- get the user id 
-//2- search in cartModel about active cart for this id
-//3- if not exisr active cart call createCartForUser function
-//4- if exist return it
-//5- 
-//6- 
-//7- 
-//8- 
-//9- 
-//10- 
-//11- 

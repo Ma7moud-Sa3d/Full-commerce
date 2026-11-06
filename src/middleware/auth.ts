@@ -1,15 +1,9 @@
-
 import jwt from "jsonwebtoken";
 import type { Request, Response, NextFunction } from "express";
 
-export const auth = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const auth = (req: Request, res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers.authorization;
-
     if (!authHeader?.startsWith("Bearer ")) {
       return res.status(401).json({
         message: "No authorization token provided",
@@ -17,20 +11,18 @@ export const auth = (
     }
 
     const token = authHeader.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({
+        message: "Token is missing",
+      });
+    }
 
-if (!token) {
-  return res.status(401).json({
-    message: "Token is missing",
-  });
-}
     const secret = process.env.SECRET_KEY;
-
     if (!secret) {
       throw new Error("SECRET_KEY is not configured");
     }
 
     const decoded = jwt.verify(token, secret);
-
     if (typeof decoded === "string" || typeof decoded.id !== "string") {
       return res.status(401).json({
         message: "Invalid token",
@@ -44,7 +36,6 @@ if (!token) {
     next(error);
   }
 };
-
 
 //! Good function for authorazation
 {
