@@ -1,10 +1,11 @@
 import express from 'express'
-import {addProductToCart, getActiveCartForUser} from "../controllers/cartControllers.js"
+import {addProductToCart, getActiveCartForUser, updateProductInCart} from "../controllers/cartControllers.js"
 import { auth } from '../middleware/auth.js'
 
 const routes = express.Router()
 
 routes.get('/', auth, getActiveCartForUser)
-routes.post('/addItem', auth, addProductToCart)
+routes.post('/item', auth, addProductToCart)
+routes.patch('/item', auth, updateProductInCart)
 
 export default routes

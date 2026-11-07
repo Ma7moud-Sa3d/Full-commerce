@@ -41,7 +41,7 @@ const getActiveCartForUser = async (req: Request, res: Response) => {
   }
 };
 
-//! Add item to cart
+//! Add item to cart ===================
 //! ===== > logic
 //1-get the product & amount & userId from body
 //2-check all exist
@@ -51,15 +51,17 @@ const getActiveCartForUser = async (req: Request, res: Response) => {
 //6-check if this product exist in the cart
 //7- if exist appear message product exist already
 //8-if no push product in the item
-//9-
+//todo: Request<Params, ResBody, ReqBody, Query> <<<<============
 //10-
 //11-
 interface AddItemToCart {
   productId: string;
   amount: number;
 }
-//todo: Request<Params, ResBody, ReqBody, Query> <<<<============
-const addProductToCart = async (req: Request<{}, {}, AddItemToCart>, res: Response,) => {
+const addProductToCart = async (
+  req: Request<{}, {}, AddItemToCart>,
+  res: Response,
+) => {
   try {
     const { productId, amount } = req.body;
     const userId = req.user?.id;
@@ -72,10 +74,7 @@ const addProductToCart = async (req: Request<{}, {}, AddItemToCart>, res: Respon
     }
 
     //! 2. Validate product ID
-    if (
-      typeof productId !== "string" ||
-      !mongoose.isValidObjectId(productId)
-    ) {
+    if (typeof productId !== "string" || !mongoose.isValidObjectId(productId)) {
       return res.status(400).json({
         message: "Invalid product ID",
       });
@@ -122,7 +121,7 @@ const addProductToCart = async (req: Request<{}, {}, AddItemToCart>, res: Respon
 
     //! 8. Check if product already exists
     const productExists = cart.items.some(
-      (item) => item.product.toString() === product._id.toString()
+      (item) => item.product.toString() === product._id.toString(),
     );
 
     if (productExists) {
@@ -148,15 +147,134 @@ const addProductToCart = async (req: Request<{}, {}, AddItemToCart>, res: Respon
       message: "Product added to cart successfully",
       data: cart,
     });
-
   } catch (error) {
     return res.status(500).json({
-      message:
-        error instanceof Error
-          ? error.message
-          : "Internal server error",
+      message: error instanceof Error ? error.message : "Internal server error",
     });
   }
 };
 
-export { getActiveCartForUser, addProductToCart };
+//! Update product in cart =================
+//! ===== > logic
+//1- get productId & amount from body
+//2- get userId from req.user.id
+//3- validate them
+//4- check product if exist and check the stock
+//5- check if exist cart for this userId & create it if not
+//6- check if this product exist in active cart by some() function
+//7- if exist minus total of existproduct from total amount of cart
+//8- update existProduct amount with new amount
+//9- then add to total amount of cart new total of product with new amount
+//*10- شرح ال reduce function ==> (https://chatgpt.com/s/t_6aee7638a9008191924e2e449d19844d)
+//11-
+interface UpdateProductInCart {
+  productId: string;
+  amount: number;
+}
+const updateProductInCart = async (
+  req: Request<{}, {}, UpdateProductInCart>,
+  res: Response,
+) => {
+  try {
+    const { productId, amount } = req.body;
+    const userId = req.user?.id;
+
+    //! 1. Check authentication
+    if (!userId) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
+    }
+
+    //! 2. Validate product ID
+    if (typeof productId !== "string" || !mongoose.isValidObjectId(productId)) {
+      return res.status(400).json({
+        message: "Invalid product ID",
+      });
+    }
+
+    //! 3. Validate amount
+    if (
+      typeof amount !== "number" ||
+      !Number.isInteger(amount) ||
+      amount <= 0
+    ) {
+      return res.status(400).json({
+        message: "Amount must be a positive integer",
+      });
+    }
+
+    //! 4. Find product
+    const product = await ProductModel.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({
+        message: "Product not found",
+      });
+    }
+
+    //! 5. Check available stock
+    if (product.stock < amount) {
+      return res.status(400).json({
+        message: "Low stack available!",
+        // message: `Only ${product.stock} items available`,
+      });
+    }
+
+    //! 6. Find active cart
+    let cart = await cartModel.findOne({
+      userId,
+      status: "active",
+    });
+
+    //! 7. Return
+    if (!cart) {
+      return res.status(404).json({
+        message: "Active cart not found",
+      });
+    }
+
+    //! 8. Check if product already exists
+    const productExists = cart.items.find(
+      (item) => item.product.toString() === product._id.toString(),
+    );
+
+    if (!productExists) {
+      return res.status(409).json({
+        message: "This product not exists in your cart",
+      });
+    }
+
+    //! update this amount
+    productExists.amount = amount;
+
+    {
+      /** 
+    //! minus latest total of this product
+    cart.totalAmount -= productExists.unitPrice * productExists.amount;
+
+    //! update this amount 
+    productExists.amount = amount
+
+    //! update new totalAmount
+    cart.totalAmount += productExists.unitPrice * productExists.amount;
+    */
+    }
+
+    //! update total amount of cart
+    cart.totalAmount = cart.items.reduce((acc, item) => {
+      return acc + item.unitPrice * item.amount;
+    }, 0);
+    const updatedCart = await cart.save();
+
+    return res
+      .status(200)
+      .json({ message: "Updated successfully", data: updatedCart });
+  } catch (error) {
+    return res.status(500).json({
+      message: error instanceof Error ? error.message : "Internal server error",
+    });
+  }
+};
+
+export { getActiveCartForUser, addProductToCart, updateProductInCart };
