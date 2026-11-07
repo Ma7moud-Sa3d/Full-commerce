@@ -277,4 +277,152 @@ const updateProductInCart = async (
   }
 };
 
-export { getActiveCartForUser, addProductToCart, updateProductInCart };
+//! DeleteProductInCart <<<<<<< ==========================
+//! ===== > logic
+//1- get productId and userId then validate them
+//2- check if this product exist in product model
+//3- check if this user has active cart
+//4- then validate if this product exist in this cart
+//5- if exist delete it
+//6- then update total amount of cart
+//*7- ليه استخدمت حاجة اسمها pull() بدل ال filter : (https://chatgpt.com/s/t_6aee8519c37481919c3a05c44a5ba45e)
+//8-
+//9-
+//10-
+//11-
+const deleteProductFromCart = async (
+  req: Request<{ productId: string }>,
+  res: Response
+) => {
+  try {
+    //! 1. Get productId and userId
+    const { productId } = req.params;
+    const userId = req.user?.id;
+
+    //! 2. Check authentication
+    if (!userId) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
+    }
+
+    //! 3. Validate productId
+    if (!mongoose.isValidObjectId(productId)) {
+      return res.status(400).json({
+        message: "Invalid product ID",
+      });
+    }
+
+    //! 4. Find active cart
+    const cart = await cartModel.findOne({
+      userId,
+      status: "active",
+    });
+
+    if (!cart) {
+      return res.status(404).json({
+        message: "Active cart not found",
+      });
+    }
+
+    //! 5. Check if product exists in cart
+    const productExists = cart.items.find(
+      (item) => item.product.toString() === productId
+    );
+
+    if (!productExists) {
+      return res.status(404).json({
+        message: "Product does not exist in your cart",
+      });
+    }
+
+    //! 6. Remove product
+    // cart.items.pull({ product: productId });
+    productExists.deleteOne();
+
+    //! 7. Recalculate totalAmount
+    cart.totalAmount = cart.items.reduce(
+      (acc, item) => acc + item.unitPrice * item.amount,
+      0
+    );
+
+    //! 8. Save updated cart
+    const updatedCart = await cart.save();
+
+    return res.status(200).json({
+      message: "Product removed from cart successfully",
+      data: updatedCart,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      message:
+        error instanceof Error
+          ? error.message
+          : "Internal server error",
+    });
+  }
+};
+
+//! Clear Cart  <<<<<<<< =====================
+// ❌ استبدال الـ DocumentArray
+// cart.items = [];
+// ✅ تعديل نفس الـ DocumentArray
+// cart.items.splice(0, cart.items.length);
+
+const clearCart = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+
+    //! 1. Check authentication
+    if (!userId) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
+    }
+
+    //! 2. Find active cart
+    const cart = await cartModel.findOne({
+      userId,
+      status: "active",
+    });
+
+    if (!cart) {
+      return res.status(404).json({
+        message: "Active cart not found",
+      });
+    }
+
+    //! 3. Remove all items
+    cart.items.splice(0, cart.items.length);
+
+    //! 4. Reset totalAmount
+    cart.totalAmount = 0;
+
+    //! 5. Save cart
+    const updatedCart = await cart.save();
+
+    return res.status(200).json({
+      message: "Cart cleared successfully",
+      data: updatedCart,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      message:
+        error instanceof Error
+          ? error.message
+          : "Internal server error",
+    });
+  }
+};
+
+
+
+export { 
+  getActiveCartForUser, 
+  addProductToCart, 
+  updateProductInCart, 
+  deleteProductFromCart,
+  clearCart
+};
