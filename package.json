@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "nodemon dist/index.js"
+    "start": "nodemon dist/index.js",
+    "create-admin": "tsx src/Admin.ts"
   },
   "keywords": [],
   "author": "",

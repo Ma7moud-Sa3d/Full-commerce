@@ -2,6 +2,7 @@ import cartModel from "../models/cartModel.js";
 import type { Request, Response } from "express";
 import ProductModel from "../models/productModel.js";
 import mongoose from "mongoose";
+import { orderModel, type IOrderItems } from "../models/orderModel.js";
 
 const createCartForUser = async (userId: string) => {
   let cart = await cartModel.findOne({
@@ -290,6 +291,7 @@ const updateProductInCart = async (
 //9-
 //10-
 //11-
+
 const deleteProductFromCart = async (
   req: Request<{ productId: string }>,
   res: Response
@@ -417,6 +419,77 @@ const clearCart = async (req: Request, res: Response) => {
   }
 };
 
+//! Checkout endpoint <<<<<<<<================
+//! ===== > logic
+//1- get address and active cart of user
+//2- check it if exist and have at least 1 item then create orderItems array
+//3- loop on all cart.items by {foreach, for of} and create variable orderItem to add in it all product then add orderItem inside orderItems array
+//4- create order 
+//5- change status of cart to "complete"
+//6- save changes on cart and order
+//7- then return order
+//8-
+//9-
+//10-
+//11-
+
+const checkout = async (req: Request<{},{},{address: string}>, res: Response)=>{
+  try {
+    const address = req.body.address
+    if(!address){
+      return res.status(400).json("Please enter your address")
+    }
+
+    const userId = req.user?.id
+    if(!userId){
+      return res.status(401).json("No Authorization!")
+    }
+
+    let cart = await cartModel.findOne({userId, status: 'active'})
+    if(!cart){
+      cart = await createCartForUser(userId)
+      return;
+    }
+    if(cart.items.length < 1){
+      return res.status(409).json("Add one product at least in your cart")
+    }
+    const orderItems: IOrderItems[] = []
+    for (const element of cart.items) {
+
+      const product = await ProductModel.findById(element.product)
+      if(!product){
+        return res.status(400).json("This product not exist")
+      }
+
+      const orderItem : IOrderItems = {
+        productTitle: product.title,
+        productImage: product.image,
+        productPrice: product.price,
+        quantity: element.amount
+      }
+
+      orderItems.push(orderItem)
+
+    };
+    const order = await orderModel.create({
+      orderItems: orderItems,
+      address: address,
+      totla: cart.totalAmount,
+      userId: userId
+    })
+
+    await order.save()
+    cart.status = "complete"
+    cart.save()
+
+    return res.status(200).json({message: "Order done", data: order})
+
+  } catch (error) {
+    return res.status(500).json({
+      message: error instanceof Error ? error.message : "Internal server error",
+    });
+  }
+}
 
 
 export { 
@@ -424,5 +497,6 @@ export {
   addProductToCart, 
   updateProductInCart, 
   deleteProductFromCart,
-  clearCart
+  clearCart,
+  checkout
 };

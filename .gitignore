@@ -17,6 +17,7 @@ pnpm-debug.log*
 dist/
 build/
 coverage/
+src/Admin.ts
 
 # TypeScript
 *.tsbuildinfo
