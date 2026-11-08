@@ -19,10 +19,14 @@ const Register = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Must enter all fields" });
     const user = new userModel({ firstName, lastName, email, password });
     await user.save();
+    const secretKey = process.env.SECRET_KEY;
+    if (!secretKey)
+      return res.status(400).json({ message: "eror hen create the token !" });
+    const token = jwt.sign({ id: user._id.toString(), role: user.role }, secretKey);
     res
       .status(201)
       .json({
-        data: { firstName: user.firstName, lastName: user.lastName },
+        data: token,
         message: "created user successfully",
       });
   } catch (error: any) {

@@ -4,6 +4,7 @@ import Footer from "./Components/Footer"
 import Home from "./Pages/Home"
 import Cart from "./Pages/Cart"
 import Login from "./Pages/Login"
+import Register from "./Pages/Register"
 
 
 const Layout = () => {
@@ -26,6 +27,7 @@ const App = () => {
       </Route>
       {/*//! ======== another routes ============ */}
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
     </Route>
   ))
   return (
