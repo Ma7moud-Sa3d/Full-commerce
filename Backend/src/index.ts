@@ -9,9 +9,11 @@ import userRoutes from "./routes/userRoutes.js";
 import { setInitialProducts } from "./controllers/productControllers.js";
 import productRoutes from "./routes/productRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
+import cors from "cors"
 
 const app = express()
 app.use(express.json())
+app.use(cors())
 const port = 3001
 
 //! Database function
