@@ -370,7 +370,7 @@ const deleteProductFromCart = async (
 // ❌ استبدال الـ DocumentArray
 // cart.items = [];
 // ✅ تعديل نفس الـ DocumentArray
-// cart.items.splice(0, cart.items.length);
+// cart.items.splice(0 : start, cart.items.length : deleteCount);
 
 const clearCart = async (req: Request, res: Response) => {
   try {
@@ -453,7 +453,7 @@ const checkout = async (req: Request<{},{},{address: string}>, res: Response)=>{
     if(cart.items.length < 1){
       return res.status(409).json("Add one product at least in your cart")
     }
-    const orderItems: IOrderItems[] = []
+    const orderItems: IOrderItems[] = [] //! this array
     for (const element of cart.items) {
 
       const product = await ProductModel.findById(element.product)
@@ -461,7 +461,7 @@ const checkout = async (req: Request<{},{},{address: string}>, res: Response)=>{
         return res.status(400).json("This product not exist")
       }
 
-      const orderItem : IOrderItems = {
+      const orderItem : IOrderItems = { //! this variable
         productTitle: product.title,
         productImage: product.image,
         productPrice: product.price,

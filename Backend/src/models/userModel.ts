@@ -48,6 +48,7 @@ userSchema.pre('save', async function (this: IUser) {
 
   this.password = await bcrypt.hash(this.password, 10);
 });
+
 //! Infer the schema type
 // export type IUser = InferSchemaType<typeof userSchema>;
 
