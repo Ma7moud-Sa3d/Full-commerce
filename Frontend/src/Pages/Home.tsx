@@ -27,7 +27,13 @@ const Home = () => {
           {products.map((item)=>(
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}
             sx={{ display: 'flex', justifyContent: 'center' }} key={item._id}>
-            <ProductCard {...item}/>
+            <ProductCard {...item}/> //! كأنك كتبت كده ده اسمه Spread Operator
+            {/*//! <ProductCard
+              _id="123"
+              title="iPhone 15"
+              image="iphone.jpg"
+              price={30000}
+            /> */}
           </Grid>
           ))}
           </Grid>
