@@ -7,9 +7,9 @@ import { BASE_URL } from "../constants/baseUrl"
 
 const Home = () => {
   const [products, setProducts] = useState<Product[]>([])
-  useEffect(()=>{
+  useEffect(() => {
     const fetchProducts = async () => {
-      const response = await axios.get(`${BASE_URL}/products/`,{
+      const response = await axios.get(`${BASE_URL}/products/`, {
         headers: {
           Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhZWRiNTJkZTgxNjFmOTIxZTU5MzE1YiIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzkzOTYzMzQzfQ.AIaWEiKnZl-mygYfhcQAwN95U1XAV6e_792t5_7ShyU`
         }
@@ -17,28 +17,31 @@ const Home = () => {
       setProducts(response.data.data)
     }
     fetchProducts()
-  },[])
+  }, [])
   return (
-      <Container>
+    <Container>
 
-        <Grid container
+      <Grid container
         spacing={4}
         sx={{ mt: 4, justifyContent: 'center' }}>
-          {products.map((item)=>(
-            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}
+        {products.map((item) => (
+          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}
             sx={{ display: 'flex', justifyContent: 'center' }} key={item._id}>
-            <ProductCard {...item}/> //! كأنك كتبت كده ده اسمه Spread Operator
-            {/*//! <ProductCard
-              _id="123"
-              title="iPhone 15"
-              image="iphone.jpg"
-              price={30000}
-            /> */}
+            <ProductCard {...item} />
           </Grid>
-          ))}
-          </Grid>
-      </Container>
+        ))}
+      </Grid>
+    </Container>
   )
 }
 
 export default Home
+
+// <ProductCard {...item}/>
+//! كأنك كتبت كده ده اسمه Spread Operator
+{/*//! <ProductCard
+  _id="123"
+  title="iPhone 15"
+  image="iphone.jpg"
+  price={30000}
+/> */}

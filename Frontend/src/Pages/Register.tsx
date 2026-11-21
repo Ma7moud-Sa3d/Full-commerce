@@ -17,26 +17,39 @@ export default function Register() {
 
 
 
+
   const onSubmit = async () => {
-    const firstName = firstNameRef.current?.value
-    const lastName = lasttNameRef.current?.value
-    const email = emailRef.current?.value
-    const password = passwordRef.current?.value
+    try {
+      const firstName = firstNameRef.current?.value;
+      const lastName = lasttNameRef.current?.value;
+      const email = emailRef.current?.value;
+      const password = passwordRef.current?.value;
 
+      //! Call the API
+      const response = await axios.post(
+        `${BASE_URL}/user/register`,
+        {
+          firstName,
+          lastName,
+          email,
+          password
+        },
+        {validateStatus: ()=> true}
+      );
 
-    //! call the API =========
-    const response = await axios.post(`${BASE_URL}/user/register`, {
-      "firstName": firstName,
-      "lastName": lastName,
-      "email": email,
-      "password": password
-    })
-    if (response.status < 200 || response.status >= 300) {
-      setError(`${response.data.message}`)
-      return;
+      console.log(response.data.message);
+
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(
+          err.response?.data?.message || "Something went wrong"
+        );
+      } else {
+        setError("An unexpected error occurred");
+      }
     }
-    console.log(response.data.message,'token:', response.data.data)
-  }
+  };
+
 
 
   return (
@@ -68,7 +81,7 @@ export default function Register() {
           Create your account
         </Typography>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1}}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
           <TextField inputRef={firstNameRef} label="First Name" fullWidth />
 
           <TextField inputRef={lasttNameRef} label="Last Name" fullWidth />
