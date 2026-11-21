@@ -10,21 +10,25 @@ import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
+import { useAuth } from '../Context/Auth/AuthContext';
 
 // const pages = ['Products', 'Pricing', 'Blog'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 function Navbar() {
+  //! test the auth context ================
+  const auth = useAuth()
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
   };
 
-
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+  //! print the token from navbar =============
+  console.log("from Navbar\n Name: ", auth?.userName, "\n token: ", auth?.token)
 
   return (
     <AppBar position="static">

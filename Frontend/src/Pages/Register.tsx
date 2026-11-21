@@ -5,6 +5,7 @@ import axios from "axios";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../constants/baseUrl";
+import { useAuth } from "../Context/Auth/AuthContext";
 
 export default function Register() {
 
@@ -14,8 +15,7 @@ export default function Register() {
   const lasttNameRef = useRef<HTMLInputElement>(null)
   const emailRef = useRef<HTMLInputElement>(null)
   const passwordRef = useRef<HTMLInputElement>(null)
-
-
+  const auth = useAuth()
 
 
   const onSubmit = async () => {
@@ -24,8 +24,12 @@ export default function Register() {
       const lastName = lasttNameRef.current?.value;
       const email = emailRef.current?.value;
       const password = passwordRef.current?.value;
+      if (!firstName || !lastName || !email || !password) {
+        setError("All fields required please!")
+        return
+      }
 
-      //! Call the API
+      //! Call the API ======================
       const response = await axios.post(
         `${BASE_URL}/user/register`,
         {
@@ -34,10 +38,17 @@ export default function Register() {
           email,
           password
         },
-        {validateStatus: ()=> true}
+        { validateStatus: () => true }
       );
 
-      console.log(response.data.message);
+      //! get the token from response ================
+      const token = response.data.data
+      if (!token) {
+        setError("No token exist!")
+        return
+      }
+      //! set the token to login direct ===========
+      auth?.login(email, token);
 
     } catch (err) {
       if (axios.isAxiosError(err)) {
