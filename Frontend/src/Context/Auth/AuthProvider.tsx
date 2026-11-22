@@ -22,9 +22,10 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
   }
   //! Logout function ===============
   const logout = () => {
+    localStorage.removeItem("userName")
+    localStorage.removeItem("token")
     setToken(null)
     setUserName(null)
-    localStorage.clear()
   }
   const isAuthenticated = !!token
 

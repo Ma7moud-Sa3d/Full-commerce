@@ -3,8 +3,8 @@ import { createContext, useContext } from "react";
 interface AuthContext {
   userName: string | null,
   token: string | null,
-  login: (userName: string, token: string)=> void,
   isAuthenticated: boolean,
+  login: (userName: string, token: string)=> void,
   logout: ()=> void
 }
 

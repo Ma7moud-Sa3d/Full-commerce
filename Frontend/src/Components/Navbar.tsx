@@ -29,8 +29,9 @@ function Navbar() {
     setAnchorElUser(null);
   };
   const handleLogOut = () => {
-    setAnchorElUser(null);
-    auth?.logout
+    handleCloseUserMenu()
+    auth?.logout()
+    navigate('/')
   };
   //! print the token from navbar =============
   // console.log("from Navbar\n Name: ", auth?.userName, "\n token: ", auth?.token)
