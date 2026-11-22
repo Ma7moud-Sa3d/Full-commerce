@@ -3,7 +3,9 @@ import { createContext, useContext } from "react";
 interface AuthContext {
   userName: string | null,
   token: string | null,
-  login: (userName: string, token: string)=> void
+  login: (userName: string, token: string)=> void,
+  isAuthenticated: boolean,
+  logout: ()=> void
 }
 
 export const authContext = createContext<AuthContext | null>(null)

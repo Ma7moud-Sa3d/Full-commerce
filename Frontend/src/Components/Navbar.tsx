@@ -11,13 +11,14 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import { useAuth } from '../Context/Auth/AuthContext';
+import { Button, Grid } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
-// const pages = ['Products', 'Pricing', 'Blog'];
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 function Navbar() {
   //! test the auth context ================
   const auth = useAuth()
+  const navigate = useNavigate()
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -27,8 +28,12 @@ function Navbar() {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+  const handleLogOut = () => {
+    setAnchorElUser(null);
+    auth?.logout
+  };
   //! print the token from navbar =============
-  console.log("from Navbar\n Name: ", auth?.userName, "\n token: ", auth?.token)
+  // console.log("from Navbar\n Name: ", auth?.userName, "\n token: ", auth?.token)
 
   return (
     <AppBar position="static">
@@ -54,13 +59,22 @@ function Navbar() {
             Full-commerce
           </Typography>
 
+          {!auth?.isAuthenticated ? 
+          <Button onClick={()=> navigate('/login')} sx={{backgroundColor: 'yellowgreen', textDecoration: "capitalize"}}>Login</Button> :
           <Box sx={{ flexGrow: 0 }}>
+            <Grid sx={{ p: 0, display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Grid>
+                <Typography color='#fafafa'>{auth?.userName}</Typography>
+              </Grid>
+              <Grid>
+                <Tooltip title="Open settings">
+                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                    <Avatar alt={auth?.userName || ''} src="/static/images/avatar/2.jpg" />
+                  </IconButton>
+                </Tooltip>
+              </Grid>
+            </Grid>
 
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-              </IconButton>
-            </Tooltip>
 
             <Menu
               sx={{ mt: '45px' }}
@@ -78,14 +92,15 @@ function Navbar() {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
-                </MenuItem>
-              ))}
+              <MenuItem onClick={handleCloseUserMenu}>
+                <Typography sx={{ textAlign: 'center' }}>Profile</Typography>
+              </MenuItem>
+              <MenuItem onClick={handleLogOut}>
+                <Typography sx={{ textAlign: 'center' }}>Logout</Typography>
+              </MenuItem>
             </Menu>
 
-          </Box>
+          </Box>}
 
         </Toolbar>
       </Container>

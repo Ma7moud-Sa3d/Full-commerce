@@ -49,6 +49,7 @@ export default function Register() {
       }
       //! set the token to login direct ===========
       auth?.login(email, token);
+      navigate('/')
 
     } catch (err) {
       if (axios.isAxiosError(err)) {

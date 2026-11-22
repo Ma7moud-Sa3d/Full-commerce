@@ -7,22 +7,30 @@ import { authContext } from './AuthContext'
 
 const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
 
-  const [userName, setUserName] = useState<string | null>(()=> localStorage.getItem("userName"))
-  const [token, setToken] = useState<string | null>(()=> localStorage.getItem("token"))
+  const [userName, setUserName] = useState<string | null>(() => localStorage.getItem("userName"))
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem("token"))
 
   //! Login function ===============
   const login = (userName: string, token: string) => {
-    console.log("Login function executed!")
+
+    setUserName(userName)
+    setToken(token)
 
     localStorage.setItem("userName", userName)
     localStorage.setItem("token", token)
 
-    setUserName(userName)
-    setToken(token)
   }
+  //! Logout function ===============
+  const logout = () => {
+    setToken(null)
+    setUserName(null)
+    localStorage.clear()
+  }
+  const isAuthenticated = !!token
+
 
   return (
-    <authContext.Provider value={{ userName, token, login }}>
+    <authContext.Provider value={{ userName, token, login, isAuthenticated, logout }}>
       {children}
     </authContext.Provider>
   )
