@@ -84,7 +84,7 @@ export default function Register() {
           borderRadius: 3,
         }}
       >
-        <SkipPreviousSharp onClick={() => navigate(-1)} />
+        <SkipPreviousSharp onClick={() => navigate("/")} />
         <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1, textAlign: 'center' }}>
           Register
         </Typography>

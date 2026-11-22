@@ -78,7 +78,7 @@ export default function Login() {
           borderRadius: 3,
         }}
       >
-        <SkipPreviousSharp onClick={() => navigate(-1)} />
+        <SkipPreviousSharp onClick={() => navigate('/')} />
         <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1, textAlign: 'center' }}>
           Login
         </Typography>

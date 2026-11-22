@@ -6,6 +6,8 @@ import Cart from "./Pages/Cart"
 import Login from "./Pages/Login"
 import Register from "./Pages/Register"
 import AuthProvider from "./Context/Auth/AuthProvider"
+import ProtectedRoute from "./Components/ProtectedRoute"
+import CartProvider from "./Context/Cart/CartProvider"
 
 
 const Layout = () => {
@@ -22,9 +24,12 @@ const App = () => {
   const router = createBrowserRouter(createRoutesFromElements(
     <Route >
       {/*//! ======== Layout routes ============ */}
-      <Route path="/" element={<Layout/>}>
+      <Route path="/" element={<Layout />}>
         <Route index element={<Home />} />
-        <Route path="/cart" element={<Cart />} />
+        {/*//! ======== protected routes ============ */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/cart" element={<Cart />} />
+        </Route>
       </Route>
       {/*//! ======== another routes ============ */}
       <Route path="/login" element={<Login />} />
@@ -33,7 +38,9 @@ const App = () => {
   ))
   return (
     <AuthProvider >
-      <RouterProvider router={router} />
+      <CartProvider>
+        <RouterProvider router={router} />
+      </CartProvider>
     </AuthProvider>
   )
 }
