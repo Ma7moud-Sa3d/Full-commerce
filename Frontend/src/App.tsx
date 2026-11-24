@@ -8,6 +8,7 @@ import Register from "./Pages/Register"
 import AuthProvider from "./Context/Auth/AuthProvider"
 import ProtectedRoute from "./Components/ProtectedRoute"
 import CartProvider from "./Context/Cart/CartProvider"
+import CheckOut from "./Pages/CheckOut"
 
 
 const Layout = () => {
@@ -29,6 +30,7 @@ const App = () => {
         {/*//! ======== protected routes ============ */}
         <Route element={<ProtectedRoute />}>
           <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<CheckOut />} />
         </Route>
       </Route>
       {/*//! ======== another routes ============ */}

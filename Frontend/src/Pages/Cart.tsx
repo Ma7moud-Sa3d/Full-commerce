@@ -165,7 +165,7 @@ const Cart = () => {
                 </Typography>
               </Stack>
 
-              <Button variant="contained" fullWidth size="large">
+              <Button variant="contained" fullWidth size="large" onClick={()=> navigate('/checkout')}>
                 Proceed to Checkout
               </Button>
             </Paper>
