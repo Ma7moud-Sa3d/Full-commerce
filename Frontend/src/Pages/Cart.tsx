@@ -1,15 +1,41 @@
-import { Container, Typography } from "@mui/material"
-import { useEffect, useState } from "react"
-import { useAuth } from "../Context/Auth/AuthContext"
-import axios from "axios"
-import { BASE_URL } from "../constants/baseUrl"
+import { Box, Container, Typography } from "@mui/material"
+import { useCart } from "../Context/Cart/CartContext"
 
 const Cart = () => {
-  const auth = useAuth()
+  const cartA = useCart()
+
+  return (
+    <Container>
+      <Typography variant="h3" sx={{pt: '8px'}}>
+        My Cart
+      </Typography>
+    {
+      cartA.cartItems.map((item)=>(
+        <Box key={item.productId}>
+          {item.title}
+        </Box>
+      ))
+    }
+    </Container>
+  );
+
+}
+
+export default Cart
+
+
+//! another logic =====================
+{/**
+
+  import { useEffect, useState } from "react"
+import axios from "axios"
+import { BASE_URL } from "../constants/baseUrl"
+import { useAuth } from "../Context/Auth/AuthContext"
+
+    const auth = useAuth()
   const [cart, setCart]= useState()
   const [error, setError] = useState("")
-
-  useEffect(()=>{
+    useEffect(()=>{
     if(!auth?.token){
       return
     }
@@ -40,14 +66,4 @@ const Cart = () => {
     }
     
   }, [auth?.token])
-
-  return (
-    <Container>
-      <Typography variant="h3" sx={{pt: '8px'}}>
-        My Cart
-      </Typography>
-    </Container>
-  )
-}
-
-export default Cart
+  */}

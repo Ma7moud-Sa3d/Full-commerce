@@ -1,17 +1,106 @@
-import { useState, type FC, type PropsWithChildren } from "react"
+import { useEffect, useState, type FC, type PropsWithChildren } from "react"
 import { CartContext } from "./CartContext"
+import axios from "axios"
+import { BASE_URL } from "../../constants/baseUrl"
+import type { CartItem } from "../../types/CartItem"
+import { useAuth } from "../Auth/AuthContext"
 
-const CartProvider: FC<PropsWithChildren> = ({children}) => {
-  const [cartItems, setCartItems] = useState([])
-  const [totalAmount, setTotalAmount] = useState(0)
+const CartProvider: FC<PropsWithChildren> = ({ children }) => {
+  const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const [totalAmount, setTotalAmount] = useState<number>(0)
+  const [error, setError] = useState("")
+  const auth = useAuth()
 
-  const addItemToCart = (id: string)=>{
-    console.log(id)
-  }
-  
-  
+  useEffect(()=>{
+    if(!auth?.token){
+      return
+    }
+    try {
+      const fetchCart = async ()=> {
+      const response = await axios.get(`${BASE_URL}/cart`, {
+        headers: {
+          Authorization: `Bearer ${auth?.token}`
+        },
+        validateStatus: ()=> true
+      })
+
+      if(response.status < 200 || response.status >= 300){
+        return setError(response.data.message)
+      }
+      const cart = response.data.data
+      const cartItemsMap = cart.items.map(
+        ({ product, amount }: { product: any; amount: number }) => ({
+          productId: product._id,
+          price: product.price,
+          image: product.image,
+          amount,
+          title: product.title,
+        })
+      );
+      setCartItems(cartItemsMap)
+
+    }
+    fetchCart()
+    } catch (error) {
+      if(axios.isAxiosError(error)){
+        return setError(error.response?.data.message || "Something wrong !")
+      }else{
+        return setError("An unexpected error occurred");
+      }
+    }
+    
+  }, [auth?.token])
+
+  const addItemToCart = async (id: string) => {
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/cart/item`,
+        {
+          productId: id,
+          amount: 1,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${auth?.token}`,
+          },
+          validateStatus: () => true,
+        }
+      );
+
+      if (response.status < 200 || response.status >= 300) {
+        setError(response.data.message || "Something went wrong!");
+        return;
+      }
+
+      const cart = response.data.data;
+
+      const cartItemsMap = cart.items.map(
+        ({ product, amount }: { product: any; amount: number }) => ({
+          productId: product._id,
+          price: product.price,
+          image: product.image,
+          amount,
+          title: product.title,
+        })
+      );
+
+      setCartItems(cartItemsMap);
+      setTotalAmount(cart.totalAmount);
+      setError("");
+
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        setError(error.response?.data.message || "Something went wrong!");
+      } else {
+        setError("An unexpected error occurred");
+      }
+    }
+  };
+
+
+
   return (
-    <CartContext.Provider value={{cartItems, totalAmount, addItemToCart}}>
+    <CartContext.Provider value={{ cartItems, totalAmount, addItemToCart }}>
       {children}
     </CartContext.Provider>
   )

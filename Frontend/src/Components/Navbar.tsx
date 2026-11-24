@@ -15,10 +15,12 @@ import { Button, Grid } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import Badge from '@mui/material/Badge';
 import { ShoppingCart } from '@mui/icons-material';
+import { useCart } from '../Context/Cart/CartContext';
 
 function Navbar() {
   //! test the auth context ================
   const auth = useAuth()
+  const cart = useCart()
   const navigate = useNavigate()
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
@@ -47,7 +49,7 @@ function Navbar() {
             variant="h5"
             noWrap
             component="a"
-            href="/"
+            onClick={()=> navigate('/')}
             sx={{
               mr: 2,
               flexGrow: 1,
@@ -56,6 +58,7 @@ function Navbar() {
               letterSpacing: '.03rem',
               color: 'inherit',
               textDecoration: 'none',
+              cursor: 'pointer'
             }}
           >
             Full-commerce
@@ -65,12 +68,10 @@ function Navbar() {
             <Button onClick={() => navigate('/login')} sx={{ backgroundColor: 'yellowgreen', textDecoration: "capitalize" }}>Login</Button> :
             <Box sx={{ flexGrow: 0 }}>
 
-              
-
               <Grid sx={{ p: 0, display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Grid>
                 <IconButton aria-label="show 4 unread messages" onClick={()=> navigate('/cart')}>
-                  <Badge badgeContent={4} color="secondary">
+                  <Badge badgeContent={cart.cartItems.length} color="secondary">
                     <ShoppingCart sx={{color: 'white'}}/>
                   </Badge>
                 </IconButton>

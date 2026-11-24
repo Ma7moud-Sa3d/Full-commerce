@@ -12,9 +12,8 @@ const createCartForUser = async (userId: string) => {
 
   if (!cart) {
     cart = await cartModel.create({ userId });
-    await cart.save();
   }
-
+  await cart.populate('items.product')
   return cart;
 };
 
@@ -29,8 +28,13 @@ const getActiveCartForUser = async (req: Request, res: Response) => {
       });
     }
 
-    const cart = await createCartForUser(userId);
+    let cart = await cartModel.findOne({ userId: userId, status: "active" });
 
+    if (!cart) {
+      cart = await createCartForUser(userId);
+    }
+
+    await cart.populate('items.product')
     return res.status(200).json({
       message: "Cart retrieved successfully",
       cart,
@@ -55,6 +59,7 @@ const getActiveCartForUser = async (req: Request, res: Response) => {
 //todo: Request<Params, ResBody, ReqBody, Query> <<<<============
 //10-
 //11-
+
 interface AddItemToCart {
   productId: string;
   amount: number;
@@ -75,7 +80,10 @@ const addProductToCart = async (
     }
 
     //! 2. Validate product ID
-    if (typeof productId !== "string" || !mongoose.isValidObjectId(productId)) {
+    if (
+      typeof productId !== "string" ||
+      !mongoose.isValidObjectId(productId)
+    ) {
       return res.status(400).json({
         message: "Invalid product ID",
       });
@@ -101,33 +109,35 @@ const addProductToCart = async (
       });
     }
 
-    //! 5. Check available stock
-    if (product.stock < amount) {
-      return res.status(400).json({
-        message: "Low stack available!",
-        // message: `Only ${product.stock} items available`,
-      });
-    }
-
-    //! 6. Find active cart
+    //! 5. Find active cart
     let cart = await cartModel.findOne({
       userId,
       status: "active",
     });
 
-    //! 7. Create cart if not found
+    //! 6. Create cart if not found
     if (!cart) {
       cart = await createCartForUser(userId);
     }
 
-    //! 8. Check if product already exists
-    const productExists = cart.items.some(
-      (item) => item.product.toString() === product._id.toString(),
+    //! 7. Check if product already exists
+    const existingItem = cart.items.find(
+      (item) =>
+        item.product.toString() === product._id.toString(),
     );
 
-    if (productExists) {
+    if (existingItem) {
       return res.status(409).json({
-        message: "This product already exists in your cart",
+        message: "Product already exists in your cart",
+      });
+    }
+
+    //! 8. Check available stock
+    if (product.stock < amount) {
+      return res.status(400).json({
+        message: `Only ${product.stock} items available`,
+        availableStock: product.stock,
+        requestedAmount: amount,
       });
     }
 
@@ -144,16 +154,25 @@ const addProductToCart = async (
     //! 11. Save cart
     await cart.save();
 
-    return res.status(200).json({
+    //! 12. Populate product details
+    await cart.populate("items.product");
+
+    //! 13. Return response
+    return res.status(201).json({
       message: "Product added to cart successfully",
       data: cart,
     });
+
   } catch (error) {
     return res.status(500).json({
-      message: error instanceof Error ? error.message : "Internal server error",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Internal server error",
     });
   }
 };
+
 
 //! Update product in cart =================
 //! ===== > logic
@@ -188,7 +207,10 @@ const updateProductInCart = async (
     }
 
     //! 2. Validate product ID
-    if (typeof productId !== "string" || !mongoose.isValidObjectId(productId)) {
+    if (
+      typeof productId !== "string" ||
+      !mongoose.isValidObjectId(productId)
+    ) {
       return res.status(400).json({
         message: "Invalid product ID",
       });
@@ -214,66 +236,64 @@ const updateProductInCart = async (
       });
     }
 
-    //! 5. Check available stock
-    if (product.stock < amount) {
-      return res.status(400).json({
-        message: "Low stack available!",
-        // message: `Only ${product.stock} items available`,
-      });
-    }
-
-    //! 6. Find active cart
-    let cart = await cartModel.findOne({
+    //! 5. Find active cart
+    const cart = await cartModel.findOne({
       userId,
       status: "active",
     });
 
-    //! 7. Return
     if (!cart) {
       return res.status(404).json({
         message: "Active cart not found",
       });
     }
 
-    //! 8. Check if product already exists
-    const productExists = cart.items.find(
+    //! 6. Find existing product in cart
+    const existingItem = cart.items.find(
       (item) => item.product.toString() === product._id.toString(),
     );
 
-    if (!productExists) {
-      return res.status(409).json({
-        message: "This product not exists in your cart",
+    if (!existingItem) {
+      return res.status(404).json({
+        message: "Product not found in your cart",
       });
     }
 
-    //! update this amount
-    productExists.amount = amount;
-
-    {
-      /** 
-    //! minus latest total of this product
-    cart.totalAmount -= productExists.unitPrice * productExists.amount;
-
-    //! update this amount 
-    productExists.amount = amount
-
-    //! update new totalAmount
-    cart.totalAmount += productExists.unitPrice * productExists.amount;
-    */
+    //! 7. Check available stock
+    if (product.stock < amount) {
+      return res.status(400).json({
+        message: `Only ${product.stock} items available`,
+        availableStock: product.stock,
+        requestedAmount: amount,
+      });
     }
 
-    //! update total amount of cart
-    cart.totalAmount = cart.items.reduce((acc, item) => {
-      return acc + item.unitPrice * item.amount;
-    }, 0);
-    const updatedCart = await cart.save();
+    //! 8. Update product quantity
+    existingItem.amount = amount;
 
-    return res
-      .status(200)
-      .json({ message: "Updated successfully", data: updatedCart });
+    //! 9. Recalculate cart total
+    cart.totalAmount = cart.items.reduce((total, item) => {
+      return total + item.unitPrice * item.amount;
+    }, 0);
+
+    //! 10. Save cart
+    await cart.save();
+
+    //! 11. Populate product details
+    await cart.populate("items.product");
+
+    //! 12. Return response
+    return res.status(200).json({
+      message: "Product quantity updated successfully",
+      data: cart,
+    });
+
   } catch (error) {
     return res.status(500).json({
-      message: error instanceof Error ? error.message : "Internal server error",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Internal server error",
     });
   }
 };
@@ -294,7 +314,7 @@ const updateProductInCart = async (
 
 const deleteProductFromCart = async (
   req: Request<{ productId: string }>,
-  res: Response
+  res: Response,
 ) => {
   try {
     //! 1. Get productId and userId
@@ -329,7 +349,7 @@ const deleteProductFromCart = async (
 
     //! 5. Check if product exists in cart
     const productExists = cart.items.find(
-      (item) => item.product.toString() === productId
+      (item) => item.product.toString() === productId,
     );
 
     if (!productExists) {
@@ -345,23 +365,22 @@ const deleteProductFromCart = async (
     //! 7. Recalculate totalAmount
     cart.totalAmount = cart.items.reduce(
       (acc, item) => acc + item.unitPrice * item.amount,
-      0
+      0,
     );
 
     //! 8. Save updated cart
-    const updatedCart = await cart.save();
+    await cart.save();
+
+    //! 11. Populate product details
+    await cart.populate("items.product");
 
     return res.status(200).json({
       message: "Product removed from cart successfully",
-      data: updatedCart,
+      data: cart,
     });
-
   } catch (error) {
     return res.status(500).json({
-      message:
-        error instanceof Error
-          ? error.message
-          : "Internal server error",
+      message: error instanceof Error ? error.message : "Internal server error",
     });
   }
 };
@@ -402,19 +421,18 @@ const clearCart = async (req: Request, res: Response) => {
     cart.totalAmount = 0;
 
     //! 5. Save cart
-    const updatedCart = await cart.save();
+    await cart.save();
+
+    //! 11. Populate product details
+    await cart.populate("items.product");
 
     return res.status(200).json({
       message: "Cart cleared successfully",
-      data: updatedCart,
+      data: cart,
     });
-
   } catch (error) {
     return res.status(500).json({
-      message:
-        error instanceof Error
-          ? error.message
-          : "Internal server error",
+      message: error instanceof Error ? error.message : "Internal server error",
     });
   }
 };
@@ -424,7 +442,7 @@ const clearCart = async (req: Request, res: Response) => {
 //1- get address and active cart of user
 //2- check it if exist and have at least 1 item then create orderItems array
 //3- loop on all cart.items by {foreach, for of} and create variable orderItem to add in it all product then add orderItem inside orderItems array
-//4- create order 
+//4- create order
 //5- change status of cart to "complete"
 //6- save changes on cart and order
 //7- then return order
@@ -433,70 +451,70 @@ const clearCart = async (req: Request, res: Response) => {
 //10-
 //11-
 
-const checkout = async (req: Request<{},{},{address: string}>, res: Response)=>{
+const checkout = async (
+  req: Request<{}, {}, { address: string }>,
+  res: Response,
+) => {
   try {
-    const address = req.body.address
-    if(!address){
-      return res.status(400).json("Please enter your address")
+    const address = req.body.address;
+    if (!address) {
+      return res.status(400).json("Please enter your address");
     }
 
-    const userId = req.user?.id
-    if(!userId){
-      return res.status(401).json("No Authorization!")
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json("No Authorization!");
     }
 
-    let cart = await cartModel.findOne({userId, status: 'active'})
-    if(!cart){
-      cart = await createCartForUser(userId)
+    let cart = await cartModel.findOne({ userId, status: "active" });
+    if (!cart) {
+      cart = await createCartForUser(userId);
       return;
     }
-    if(cart.items.length < 1){
-      return res.status(409).json("Add one product at least in your cart")
+    if (cart.items.length < 1) {
+      return res.status(409).json("Add one product at least in your cart");
     }
-    const orderItems: IOrderItems[] = [] //! this array
+    const orderItems: IOrderItems[] = []; //! this array
     for (const element of cart.items) {
-
-      const product = await ProductModel.findById(element.product)
-      if(!product){
-        return res.status(400).json("This product not exist")
+      const product = await ProductModel.findById(element.product);
+      if (!product) {
+        return res.status(400).json("This product not exist");
       }
 
-      const orderItem : IOrderItems = { //! this variable
+      const orderItem: IOrderItems = {
+        //! this variable
         productTitle: product.title,
         productImage: product.image,
         productPrice: product.price,
-        quantity: element.amount
-      }
+        quantity: element.amount,
+      };
 
-      orderItems.push(orderItem)
-
-    };
+      orderItems.push(orderItem);
+    }
     const order = await orderModel.create({
       orderItems: orderItems,
       address: address,
       totla: cart.totalAmount,
-      userId: userId
-    })
+      userId: userId,
+    });
 
-    await order.save()
-    cart.status = "complete"
-    cart.save()
+    await order.save();
+    cart.status = "complete";
+    await cart.save();
 
-    return res.status(200).json({message: "Order done", data: order})
-
+    return res.status(200).json({ message: "Order done", data: order });
   } catch (error) {
     return res.status(500).json({
       message: error instanceof Error ? error.message : "Internal server error",
     });
   }
-}
+};
 
-
-export { 
-  getActiveCartForUser, 
-  addProductToCart, 
-  updateProductInCart, 
+export {
+  getActiveCartForUser,
+  addProductToCart,
+  updateProductInCart,
   deleteProductFromCart,
   clearCart,
-  checkout
+  checkout,
 };
