@@ -88,12 +88,10 @@ cp .env.example .env
 Update `Backend/.env` with your configuration:
 
 ```dotenv
-DB_URL=mongodb://localhost:27017/full-commerce
-PORT=3001
-SECRET_KEY=replace_with_a_long_random_secret
+DB_URL= 
+PORT= 
+SECRET_KEY= 
 ```
-
-> The current server entry point uses port `3001` when starting. `PORT` is loaded for configuration but may need to be added to the server startup logic if you want it to control the listening port.
 
 Install dependencies and start the API:
 
