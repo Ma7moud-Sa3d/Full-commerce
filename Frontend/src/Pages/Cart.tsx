@@ -16,8 +16,11 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useCart } from "../Context/Cart/CartContext";
 
 const Cart = () => {
-  const { cartItems, totalAmount } =
-    useCart();
+  const { cartItems, totalAmount, updateItemInCart } = useCart();
+
+  const handleQuantity = (productId: string, quantity: number)=>{
+    updateItemInCart(productId, quantity)
+  }
 
 
   return (
@@ -41,7 +44,7 @@ const Cart = () => {
             alignItems: "start",
           }}
         >
-          {/* Items */}
+          {/*//! Items */}
           <Stack spacing={2}>
             {cartItems.map((item) => (
               <Card
@@ -73,34 +76,39 @@ const Cart = () => {
                     {item.title}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    ${item.price.toFixed(2)} each
+                    ${item.price.toFixed(2)} EGY
                   </Typography>
 
-                  {/* Quantity controls */}
+                  {/*//! Quantity controls + - buttons */}
                   <Stack
                     direction="row"
                     spacing={0.5}
                     sx={{ mt: 1, alignItems: "center" }}
                   >
+                    {/*//! Minus  */}
                     <IconButton
                       size="small"
                       aria-label="decrease quantity"
                       disabled={item.amount <= 1}
                       sx={{ border: 1, borderColor: "divider" }}
+                      onClick={()=> handleQuantity(item.productId, item.amount-1)}
                     >
                       <RemoveIcon fontSize="small" />
                     </IconButton>
 
+                    {/*//! Amount  */}
                     <Typography
                       sx={{ minWidth: 32, textAlign: "center", fontWeight: 600 }}
                     >
                       {item.amount}
                     </Typography>
 
+                    {/*//! Plus  */}
                     <IconButton
                       size="small"
                       aria-label="increase quantity"
                       sx={{ border: 1, borderColor: "divider" }}
+                      onClick={()=> handleQuantity(item.productId, item.amount+1)}
                     >
                       <AddIcon fontSize="small" />
                     </IconButton>
@@ -122,7 +130,7 @@ const Cart = () => {
             ))}
           </Stack>
 
-          {/* Summary */}
+          {/*//! Summary */}
           <Paper
             elevation={3}
             sx={{ p: 3, borderRadius: 2, position: { md: "sticky" }, top: 16 }}
