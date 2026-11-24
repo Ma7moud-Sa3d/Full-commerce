@@ -4,8 +4,10 @@ import type { CartItem } from "../../types/CartItem";
 interface CartContext{
   cartItems: CartItem[],
   totalAmount: number,
-  addItemToCart: (id: string)=> void
-  updateItemInCart: (productId: string, quantity: number)=> void
+  addItemToCart: (id: string)=> void,
+  updateItemInCart: (productId: string, quantity: number)=> void,
+  removeItemInCart: (productId: string)=> void,
+  clearCart: ()=> void
 }
 
 export const CartContext = createContext<CartContext | null>(null)

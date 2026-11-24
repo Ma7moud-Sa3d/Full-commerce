@@ -142,8 +142,92 @@ const CartProvider: FC<PropsWithChildren> = ({ children }) => {
   }
 
 
+  const removeItemInCart = async(id: string)=>{
+    try {
+      const response = await axios.delete(
+        `${BASE_URL}/cart/item/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${auth?.token}`,
+          },
+          validateStatus: () => true,
+        }
+      );
+
+      if (response.status < 200 || response.status >= 300) {
+        console.log(response.data.message || "Something went wrong!");
+        return;
+      }
+
+      const cart = response.data.data;
+
+      const cartItemsMap = cart.items.map(
+        ({ product, amount }: { product: any; amount: number }) => ({
+          productId: product._id,
+          price: product.price,
+          image: product.image,
+          amount: amount,
+          title: product.title,
+        })
+      );
+
+      setCartItems(cartItemsMap);
+      setTotalAmount(cart.totalAmount);
+
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return console.log(error.response?.data.message || "Something went wrong!");
+      } else {
+        return console.log("An unexpected error occurred");
+      }
+    }
+  }
+
+
+  const clearCart = async()=>{
+    try {
+      const response = await axios.delete(
+        `${BASE_URL}/cart/item`,
+        {
+          headers: {
+            Authorization: `Bearer ${auth?.token}`,
+          },
+          validateStatus: () => true,
+        }
+      );
+
+      if (response.status < 200 || response.status >= 300) {
+        console.log(response.data.message || "Something went wrong!");
+        return;
+      }
+
+      const cart = response.data.data;
+
+      const cartItemsMap = cart.items.map(
+        ({ product, amount }: { product: any; amount: number }) => ({
+          productId: product._id,
+          price: product.price,
+          image: product.image,
+          amount: amount,
+          title: product.title,
+        })
+      );
+
+      setCartItems(cartItemsMap);
+      setTotalAmount(cart.totalAmount);
+
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return console.log(error.response?.data.message || "Something went wrong!");
+      } else {
+        return console.log("An unexpected error occurred");
+      }
+    }
+  }
+
+
   return (
-    <CartContext.Provider value={{ cartItems, totalAmount, addItemToCart, updateItemInCart }}>
+    <CartContext.Provider value={{ cartItems, totalAmount, addItemToCart, updateItemInCart, removeItemInCart, clearCart }}>
       {children}
     </CartContext.Provider>
   )
