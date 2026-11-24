@@ -456,49 +456,45 @@ const checkout = async (
   res: Response,
 ) => {
   try {
-    const address = req.body.address;
+    const address = req.body.address?.trim();
     if (!address) {
-      return res.status(400).json("Please enter your address");
+      return res.status(400).json({ message: "Please enter your address" });
     }
 
     const userId = req.user?.id;
     if (!userId) {
-      return res.status(401).json("No Authorization!");
+      return res.status(401).json({ message: "No Authorization!" });
     }
 
-    let cart = await cartModel.findOne({ userId, status: "active" });
-    if (!cart) {
-      cart = await createCartForUser(userId);
-      return;
+    const cart = await cartModel.findOne({ userId, status: "active" });
+    if (!cart || cart.items.length < 1) {
+      return res
+        .status(409)
+        .json({ message: "Add at least one product to your cart" });
     }
-    if (cart.items.length < 1) {
-      return res.status(409).json("Add one product at least in your cart");
-    }
-    const orderItems: IOrderItems[] = []; //! this array
+
+    const orderItems: IOrderItems[] = [];
     for (const element of cart.items) {
       const product = await ProductModel.findById(element.product);
       if (!product) {
-        return res.status(400).json("This product not exist");
+        return res.status(400).json({ message: "This product does not exist" });
       }
 
-      const orderItem: IOrderItems = {
-        //! this variable
+      orderItems.push({
         productTitle: product.title,
         productImage: product.image,
         productPrice: product.price,
         quantity: element.amount,
-      };
-
-      orderItems.push(orderItem);
+      });
     }
+
     const order = await orderModel.create({
-      orderItems: orderItems,
-      address: address,
+      orderItems,
+      address,
       totla: cart.totalAmount,
-      userId: userId,
+      userId,
     });
 
-    await order.save();
     cart.status = "complete";
     await cart.save();
 

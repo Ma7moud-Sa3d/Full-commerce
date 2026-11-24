@@ -102,6 +102,7 @@ export default function Login() {
           >
             Sign In
           </Button>
+          <Typography >Create Account <span onClick={()=> navigate('/register')} style={{color: "#0763f7", cursor: 'pointer'}}>Register</span></Typography>
           {error && <Typography sx={{ color: 'red' }}>{error}</Typography>}
         </Box>
       </Paper>
