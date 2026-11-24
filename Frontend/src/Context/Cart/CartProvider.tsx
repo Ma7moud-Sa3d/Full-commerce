@@ -8,7 +8,6 @@ import { useAuth } from "../Auth/AuthContext"
 const CartProvider: FC<PropsWithChildren> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [totalAmount, setTotalAmount] = useState<number>(0)
-  const [error, setError] = useState("")
   const auth = useAuth()
 
   useEffect(()=>{
@@ -25,7 +24,7 @@ const CartProvider: FC<PropsWithChildren> = ({ children }) => {
       })
 
       if(response.status < 200 || response.status >= 300){
-        return setError(response.data.message)
+        return console.log(response.data.message)
       }
       const cart = response.data.data
       const cartItemsMap = cart.items.map(
@@ -43,9 +42,9 @@ const CartProvider: FC<PropsWithChildren> = ({ children }) => {
     fetchCart()
     } catch (error) {
       if(axios.isAxiosError(error)){
-        return setError(error.response?.data.message || "Something wrong !")
+        return console.log(error.response?.data.message || "Something wrong !")
       }else{
-        return setError("An unexpected error occurred");
+        return console.log("An unexpected error occurred");
       }
     }
     
@@ -68,7 +67,7 @@ const CartProvider: FC<PropsWithChildren> = ({ children }) => {
       );
 
       if (response.status < 200 || response.status >= 300) {
-        setError(response.data.message || "Something went wrong!");
+        console.log(response.data.message || "Something went wrong!");
         return;
       }
 
@@ -86,13 +85,12 @@ const CartProvider: FC<PropsWithChildren> = ({ children }) => {
 
       setCartItems(cartItemsMap);
       setTotalAmount(cart.totalAmount);
-      setError("");
 
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        setError(error.response?.data.message || "Something went wrong!");
+        return console.log(error.response?.data.message || "Something went wrong!");
       } else {
-        setError("An unexpected error occurred");
+        return console.log("An unexpected error occurred");
       }
     }
   };

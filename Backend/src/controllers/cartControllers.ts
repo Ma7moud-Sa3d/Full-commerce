@@ -37,7 +37,7 @@ const getActiveCartForUser = async (req: Request, res: Response) => {
     await cart.populate('items.product')
     return res.status(200).json({
       message: "Cart retrieved successfully",
-      cart,
+      data: cart,
     });
   } catch (error) {
     return res.status(500).json({
