@@ -1,69 +1,163 @@
-import { Box, Container, Typography } from "@mui/material"
-import { useCart } from "../Context/Cart/CartContext"
+import {
+  Box,
+  Button,
+  Card,
+  CardMedia,
+  Container,
+  Divider,
+  IconButton,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { useCart } from "../Context/Cart/CartContext";
 
 const Cart = () => {
-  const cartA = useCart()
+  const { cartItems, totalAmount } =
+    useCart();
+
 
   return (
-    <Container>
-      <Typography variant="h3" sx={{pt: '8px'}}>
+    <Container sx={{ py: 4 }}>
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>
         My Cart
       </Typography>
-    {
-      cartA.cartItems.map((item)=>(
-        <Box key={item.productId}>
-          {item.title}
+
+      {cartItems.length === 0 ? (
+        <Paper sx={{ p: 6, textAlign: "center" }}>
+          <Typography variant="h6" color="text.secondary">
+            Your cart is empty
+          </Typography>
+        </Paper>
+      ) : (
+        <Box
+          sx={{
+            display: "grid",
+            gap: 3,
+            gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" },
+            alignItems: "start",
+          }}
+        >
+          {/* Items */}
+          <Stack spacing={2}>
+            {cartItems.map((item) => (
+              <Card
+                key={item.productId}
+                elevation={2}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  flexWrap: { xs: "wrap", sm: "nowrap" },
+                  p: 1.5,
+                  gap: 2,
+                  borderRadius: 2,
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  image={item.image}
+                  alt={item.title}
+                  sx={{
+                    width: { xs: 90, sm: 140 },
+                    height: { xs: 70, sm: 95 },
+                    objectFit: "cover",
+                    borderRadius: 1.5,
+                  }}
+                />
+
+                <Box sx={{ flexGrow: 1, minWidth: 140 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                    {item.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    ${item.price.toFixed(2)} each
+                  </Typography>
+
+                  {/* Quantity controls */}
+                  <Stack
+                    direction="row"
+                    spacing={0.5}
+                    sx={{ mt: 1, alignItems: "center" }}
+                  >
+                    <IconButton
+                      size="small"
+                      aria-label="decrease quantity"
+                      disabled={item.amount <= 1}
+                      sx={{ border: 1, borderColor: "divider" }}
+                    >
+                      <RemoveIcon fontSize="small" />
+                    </IconButton>
+
+                    <Typography
+                      sx={{ minWidth: 32, textAlign: "center", fontWeight: 600 }}
+                    >
+                      {item.amount}
+                    </Typography>
+
+                    <IconButton
+                      size="small"
+                      aria-label="increase quantity"
+                      sx={{ border: 1, borderColor: "divider" }}
+                    >
+                      <AddIcon fontSize="small" />
+                    </IconButton>
+                  </Stack>
+                </Box>
+
+                <Stack spacing={1} sx={{ alignItems: "flex-end", pr: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    ${(item.price * item.amount).toFixed(2)}
+                  </Typography>
+                  <IconButton
+                    color="error"
+                    aria-label="remove item"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Stack>
+              </Card>
+            ))}
+          </Stack>
+
+          {/* Summary */}
+          <Paper
+            elevation={3}
+            sx={{ p: 3, borderRadius: 2, position: { md: "sticky" }, top: 16 }}
+          >
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
+              Order Summary
+            </Typography>
+
+            <Stack direction="row" sx={{ mb: 1, justifyContent: "space-between" }}>
+              <Typography color="text.secondary">Items</Typography>
+              <Typography>
+                {cartItems.reduce((sum, i) => sum + i.amount, 0)}
+              </Typography>
+            </Stack>
+
+            <Divider sx={{ my: 2 }} />
+
+            <Stack direction="row" sx={{ mb: 3, justifyContent: "space-between" }}>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                Total
+              </Typography>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                ${totalAmount.toFixed(2)}
+              </Typography>
+            </Stack>
+
+            <Button variant="contained" fullWidth size="large">
+              Proceed to Checkout
+            </Button>
+          </Paper>
         </Box>
-      ))
-    }
+      )}
     </Container>
   );
+};
 
-}
+export default Cart;
 
-export default Cart
-
-
-//! another logic =====================
-{/**
-
-  import { useEffect, useState } from "react"
-import axios from "axios"
-import { BASE_URL } from "../constants/baseUrl"
-import { useAuth } from "../Context/Auth/AuthContext"
-
-    const auth = useAuth()
-  const [cart, setCart]= useState()
-  const [error, setError] = useState("")
-    useEffect(()=>{
-    if(!auth?.token){
-      return
-    }
-    try {
-      const fetchCart = async ()=> {
-      const response = await axios.get(`${BASE_URL}/cart`, {
-        headers: {
-          Authorization: `Bearer ${auth?.token}`
-        },
-        validateStatus: ()=> true
-      })
-
-      if(response.status < 200 || response.status >= 300){
-        setError(response.data.message)
-      }
-
-      console.log(response.data.message,"\n", response.data.data)
-      setCart(response.data.data)
-
-    }
-    fetchCart()
-    } catch (error) {
-      if(axios.isAxiosError(error)){
-        setError(error.response?.data.message || "Something wrong !")
-      }else{
-        setError("An unexpected error occurred");
-      }
-    }
-    
-  }, [auth?.token])
-  */}

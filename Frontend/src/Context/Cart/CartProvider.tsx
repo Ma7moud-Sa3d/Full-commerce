@@ -37,6 +37,7 @@ const CartProvider: FC<PropsWithChildren> = ({ children }) => {
         })
       );
       setCartItems(cartItemsMap)
+      setTotalAmount(cart.totalAmount)
 
     }
     fetchCart()
