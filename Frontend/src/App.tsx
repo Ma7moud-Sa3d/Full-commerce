@@ -9,6 +9,7 @@ import AuthProvider from "./Context/Auth/AuthProvider"
 import ProtectedRoute from "./Components/ProtectedRoute"
 import CartProvider from "./Context/Cart/CartProvider"
 import CheckOut from "./Pages/CheckOut"
+import SucecssOrder from "./Pages/SucecssOrder"
 
 
 const Layout = () => {
@@ -31,6 +32,7 @@ const App = () => {
         <Route element={<ProtectedRoute />}>
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<CheckOut />} />
+          <Route path="/success-order" element={<SucecssOrder />} />
         </Route>
       </Route>
       {/*//! ======== another routes ============ */}

@@ -1,17 +1,11 @@
 
 import { useNavigate } from "react-router-dom";
-import {
-  Box,
-  Button,
-  Container,
-  Divider,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Container, Divider, Paper, Stack, TextField, Typography } from "@mui/material";
 import { useCart } from "../Context/Cart/CartContext";
 import { useRef } from "react";
+import axios from "axios";
+import { BASE_URL } from "../constants/baseUrl";
+import { useAuth } from "../Context/Auth/AuthContext";
 
 
 
@@ -19,6 +13,30 @@ const CheckOut = () => {
   const { cartItems, totalAmount } = useCart();
   const navigate = useNavigate();
   const addressRef = useRef<HTMLInputElement>(null)
+  const auth = useAuth()
+
+  const handleCheckout = async () => {
+    const address = addressRef.current?.value
+    if (!address) return;
+    
+    const response = await axios.post(
+      `${BASE_URL}/cart/checkout`,
+      {
+        address: address
+      },
+      {
+        headers: { Authorization: `Bearer ${auth?.token}` },
+        validateStatus: () => true
+      }
+    );
+
+    if (response.status < 200 || response.status <= 300) {
+      return
+    }
+
+    navigate('/success-order')
+
+  }
 
 
 
@@ -117,6 +135,7 @@ const CheckOut = () => {
           <Button
             variant="contained"
             color="success"
+            onClick={handleCheckout}
             disabled={cartItems.length === 0}
             sx={{ textTransform: "none", fontWeight: 600, marginTop: 3, width: '100%', margin: ' ' }}
           >
