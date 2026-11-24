@@ -187,7 +187,7 @@ const CartProvider: FC<PropsWithChildren> = ({ children }) => {
   const clearCart = async()=>{
     try {
       const response = await axios.delete(
-        `${BASE_URL}/cart/item`,
+        `${BASE_URL}/cart/item/`,
         {
           headers: {
             Authorization: `Bearer ${auth?.token}`,
@@ -201,20 +201,8 @@ const CartProvider: FC<PropsWithChildren> = ({ children }) => {
         return;
       }
 
-      const cart = response.data.data;
-
-      const cartItemsMap = cart.items.map(
-        ({ product, amount }: { product: any; amount: number }) => ({
-          productId: product._id,
-          price: product.price,
-          image: product.image,
-          amount: amount,
-          title: product.title,
-        })
-      );
-
-      setCartItems(cartItemsMap);
-      setTotalAmount(cart.totalAmount);
+      setCartItems([]);
+      setTotalAmount(0);
 
     } catch (error) {
       if (axios.isAxiosError(error)) {

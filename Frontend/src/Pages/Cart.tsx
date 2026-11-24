@@ -15,9 +15,10 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import { useCart } from "../Context/Cart/CartContext";
-import { red } from "@mui/material/colors";
+import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
+  const navigate = useNavigate()
   const { cartItems, totalAmount, updateItemInCart, removeItemInCart, clearCart } = useCart();
 
   const handleQuantity = (productId: string, quantity: number) => {
@@ -37,7 +38,7 @@ const Cart = () => {
       {cartItems.length === 0 ? (
         <Paper sx={{ p: 6, textAlign: "center" }}>
           <Typography variant="h6" color="text.secondary">
-            Your cart is empty
+            Your cart is empty <span onClick={()=> navigate('/')} style={{ color: "blue", textDecoration: 'underLine', cursor: 'pointer'}}>Go Shoping</span>
           </Typography>
         </Paper>
       ) : (
